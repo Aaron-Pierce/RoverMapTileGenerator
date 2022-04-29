@@ -26,12 +26,14 @@
         <![endif]-->
     <div id="map" style="width: 100vmin; height: 100vmin;"></div>
     <script async defer>
+        // the lat/lon coords are the center of the map, 10 is the default zoom.
         var map = L.map('map').setView([38.4375, -110.8125], 10);
 
         L.tileLayer('tiles/{z}/{x}/{y}', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        // These are the bounds of the rover team's map region for debugging.
         new L.marker([38.4375, -110.8125]).addTo(map)
         new L.marker([38.3750, -110.7500]).addTo(map)
 
