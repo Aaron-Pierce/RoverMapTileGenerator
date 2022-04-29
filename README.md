@@ -24,13 +24,17 @@ It should be one large image named `m_3811034_se_12_1_20160707.tif`, the .txt fi
 
 You'll need opencv and numpy installed - I used version 4.5.5 of opencv and version 1.22.3 of numpy.
 
+(To run the dev server to serve those tiles, you'll need to just run `npm install`.
+The dev server will display a map centered on the map region for the rover team, if you want to see a different region
+you can just change the coordinates in `index.html`)
+
 ## Usage
 
 The CLI needs a source image to pull tiles from and it needs to know where that source image comes from on the globe.
 
 `python generate_tiles.py [imagename] [southLatitude] [northLatitude] [westLongitude] [eastLongitude]`.
 
-If you're on the rover team, you want to invoke it with 
+If you're on the rover team, you want to invoke it with
 `python generate_tiles.py m_3811034_se_12_1_20160707.tif 38.3750 38.4375 -110.8125 -110.7500`
 
 The tiles will be output to `./tiles/`, of the format "z{z}, x{x}, y{y}.jpg", so you can serve the tiles as static content.
