@@ -9,7 +9,7 @@ This is almost certainly not targeted at us, but it's still a ToC violation,
 so we needed another solution.
 
 We used the [USGS Earth Explorer](https://earthexplorer.usgs.gov/) to obtain a super high-res .tif file
-of a sattelite image over our region of interest ([The Mars Desert Research Station](http://mdrs.marssociety.org/)).
+of a satellite image over our region of interest ([The Mars Desert Research Station](http://mdrs.marssociety.org/)).
 If you're on the rover team and happened to have lost the source image,
 the image is from the NAIP dataset, entity id `m_3811034_se_12_1_20160707`.
 (scroll down to search criteria, hit the 'decimal' button just below the polygon/circle/predefined area buttons, to switch to decimal coordinate input.
