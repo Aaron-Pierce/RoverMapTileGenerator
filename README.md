@@ -26,7 +26,9 @@ You'll need opencv and numpy installed - I used version 4.5.5 of opencv and vers
 
 (To run the dev server to serve those tiles, you'll need to just run `npm install`.
 The dev server will display a map centered on the map region for the rover team, if you want to see a different region
-you can just change the coordinates in `index.html`)
+you can just change the coordinates in `index.html`.)
+
+(For the rover team, the server is in Mission Control, and you just need to populate the tiles directory.)
 
 ## Usage
 
