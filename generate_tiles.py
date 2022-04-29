@@ -68,27 +68,6 @@ def generateTiles(image_name, northWestLatLon, southEastLatLon, baseZoomValue, m
     mapImageWidth = mapImage.shape[1]
 
 
-    # From a pixel coordinate on the map image,
-    # return it's lat/lon.
-    # This is the inverse of latLonToPixels
-    def pixelsToLatLon(x, y):
-        # x pixels map to longitude,
-        # y pixels map to latitude
-
-        # We'll ignore the curvture of the earth for now,
-        # and hope it doesn't introduce substantial error.
-
-        frationAlongHorizAxis = x / mapImageWidth
-        frationAlongVertAxis = y / mapImageHeight
-
-
-        longitudeRange = southEastLatLon[1] - northWestLatLon[1]
-        latitudeRange = southEastLatLon[0] - northWestLatLon[0]
-
-        return (northWestLatLon[0] + frationAlongVertAxis * latitudeRange, northWestLatLon[1] + frationAlongHorizAxis * longitudeRange)
-
-
-
     # From a lat/lon in world space, convert it to a pixel location
     # on the mapImage. This may be negative or outside the bounds of the image,
     # representing that the map doesn't contain that point.
@@ -116,9 +95,13 @@ def generateTiles(image_name, northWestLatLon, southEastLatLon, baseZoomValue, m
         numTilesToCreate = 2**zoomInFactor
 
 
+        # the true zoom value of a tile
         z = baseZoomValue + zoomInFactor
         print(f"Generating tiles for zoom level {z}/{19}", flush=True)
 
+        # the index of the north western most (minimum x and y)
+        # tile that we generate in this step.
+        # we'll move to the right and down to fill out the grid for this step.
         tileNumRoot = deg2num(*tileBaseLatLon, z)
 
         for tileDx in range(0, numTilesToCreate):
@@ -127,26 +110,35 @@ def generateTiles(image_name, northWestLatLon, southEastLatLon, baseZoomValue, m
                 tileY = tileNumRoot[1] + tileDy
                 # figure out what our lat/lon bounds are
                 tileTopLeftLatLon = num2deg(tileX, tileY, z)
-                # print(f"Placing at latlon {windowTopLeftLatLon}")
                 tileBottomRightLatLon = num2deg(tileX+1, tileY+1, z)
-                # print(f"\t to {windowBottomRightLatLon}")
-
 
                 tileLatBounds = [min(tileTopLeftLatLon[0], tileBottomRightLatLon[0]), max(tileTopLeftLatLon[0], tileBottomRightLatLon[0])]
                 tileLonBounds = [min(tileTopLeftLatLon[1], tileBottomRightLatLon[1]), max(tileTopLeftLatLon[1], tileBottomRightLatLon[1])]
 
+
+                # figure out what region of lat and lon from our tile intersects the map
                 latRangeToDraw = intersectIntervals(tileLatBounds, mapLatBounds)
                 lonRangeToDraw = intersectIntervals(tileLonBounds, mapLonBounds)
 
 
+
+                # if we have a meaningful intersection in both axes, we need to draw
+                # some section of the map!                
                 if isIntervalNonempty(latRangeToDraw) and isIntervalNonempty(lonRangeToDraw):
+                    # This is the base of the tile. We'll draw the intersected map region on it.
                     blankImage = np.zeros((256, 256, 3), np.uint8)
 
+
+                    ## These pixel ranges are on the tile, not the mapImage
                     yPixelRange = (
                         round(256 * ((lonRangeToDraw[0] - tileLonBounds[0]) / (tileLonBounds[1] - tileLonBounds[0]))),
                         round(256 * ((lonRangeToDraw[1] - tileLonBounds[0]) / (tileLonBounds[1] - tileLonBounds[0])))
                     )
 
+                    # Some insane coordinate axis garbling.
+                    # transposed and inverted arguments, which I discovered
+                    # by literally bruteforcing all 8 possible combinations
+                    # of inversions and transpositions until it worked.
                     xPixelRange = (
                         256 - round(256 * (latRangeToDraw[1] - tileLatBounds[0]) / (tileLatBounds[1] - tileLatBounds[0])),
                         256 - round(256 * (latRangeToDraw[0] - tileLatBounds[0]) / (tileLatBounds[1] - tileLatBounds[0])),
@@ -155,11 +147,12 @@ def generateTiles(image_name, northWestLatLon, southEastLatLon, baseZoomValue, m
                     pixelRangeWidth = xPixelRange[1] - xPixelRange[0]
                     pixelRangeHeight = yPixelRange[1] - yPixelRange[0]
                     
+                    # no need to draw a tile with no section of the map.
                     if pixelRangeWidth == 0 or pixelRangeHeight == 0:
-                        cv.imwrite("tiles/z{}, x{}, y{}.jpg".format(z, tileX, tileY), blankImage)   
                         continue
 
-
+                    # Figure out what region of the mapImage to pull off,
+                    # resize it, and stick it into the tile image.
                     imageTopLeft = latLonToPixels(latRangeToDraw[1], lonRangeToDraw[0])
                     imageBottomRight = latLonToPixels(latRangeToDraw[0], lonRangeToDraw[1])
                     mapSeg = mapImage[
