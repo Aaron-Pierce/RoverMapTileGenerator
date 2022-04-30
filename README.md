@@ -46,6 +46,7 @@ For example, say you have some tile named `z11, x393, y786.jpg`, stored in some 
 When the user pans leaflet over that tile, leaflet will make a request to "/tiles/11/393/786" on your server,
 you'll pick off those values, read in the file `z11, x393, y786.jpg`, and send that off.
 
+
 ## How tiles are generated
 
 A slippy map tile is defined by a zoom level and an x, y position. All tiles are 256x256 pixels.
@@ -58,6 +59,16 @@ will start at zoom level 5, and go all the way to 22.
 
 The program begins by generating a single tile at the base zoom level, and it will only generate
 subdivisions of this tile. You can keep increasing the value you set as the base value if it cuts off your map.
+
+Make sure that you set your client's leaflet map to
+be at the right zoom level by default - just set it to whatever base zoom level you pass in with the b flag.
+If you didn't change it, set it to 10.
+If there's no tile for some zoom level, the leaflet map will display nothing,
+so it'll look like there are no tiles until you zoom in to a zoom
+level which you generated tiles for. You could just generate
+starting at level 0, that way you'd always be able to find the area
+you generated tiles for, or set the leaflet map to have a max zoom
+equal to whatever base zoom level you used.
 
 The program will figure out what tiles need to be generated, and then will find where the map image should intersect these tiles,
 pick off that subimage, and correctly scale and place it. It won't generate tiles that do not intersect with the map region.
